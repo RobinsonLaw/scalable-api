@@ -1,70 +1,40 @@
-# 🐳 Scalable Docker API (Flask + NGINX + Compose)
-
-This is a simple horizontally-scalable API demo using Docker Compose, Flask, and NGINX.
-
-Each API container responds with its own hostname, so you can see which container handled each request — perfect for understanding how container scaling and load balancing works locally.
-
----
-
-## 📁 Project Structure
-
-```
+🐳 Scalable Docker API with Caddy Reverse Proxy
+This project demonstrates a horizontally-scalable Flask API powered by Docker Compose, served through a production-ready Caddy reverse proxy with automatic HTTPS and flexible service scaling.
+Each API container responds with its hostname so you can observe Docker’s internal load balancing in action — perfect for demos, testing, or scaffolding production microservices.
+📁 Project Structure
 .
-├── app.py              # Flask API returning hostname
-├── Dockerfile          # Containerizes the app
-├── nginx.conf          # Load balances across API containers
-└── docker-compose.yml  # Defines and scales services
-```
-
----
-
-## 🚀 Quick Start
-
-1. **Clone or create this project**
-   ```bash
-   git clone https://github.com/your-username/scalable-api.git
-   cd scalable-api
-   ```
-
-2. **Start it up and scale**
-   ```bash
-   docker compose up --build --scale api=3 -d
-   ```
-
-3. **Visit your API**
-   Open your browser at: [http://localhost:8080](http://localhost:8080)  
-   Refresh a few times — each response should show a different container hostname.
-
----
-
-## 🧠 How It Works
-
-- The Flask `api` service runs in multiple containers.
-- NGINX receives all incoming traffic and forwards it to a randomly selected container.
-- Docker Compose handles building, scaling, and networking between services.
-
----
-
-## ⚙️ Commands
-
-Scale up/down the number of containers:
-```bash
-docker compose up --scale api=5 -d
-```
-
-Stop and remove everything:
-```bash
-docker compose down
-```
-
----
-
-## 🚧 Possible Next Steps
-
-- Add automatic CPU-based scaling
-- Add monitoring with Prometheus + Grafana
-- Deploy on Kubernetes for production-ready orchestration
-
----
-
-Made with 🧠 & 🐳 by [RobinsonLaw](https://github.com/RobinsonLaw)
+├── app.py              # Simple Flask API returning hostname
+├── Dockerfile          # Containerizes the Flask app
+├── Caddyfile           # Configures Caddy as reverse proxy
+├── docker-compose.yml  # Defines multi-container stack
+└── README.md           # You're reading this 😉
+🚀 Quick Start
+Clean and rebuild your stack
+bash
+docker-compose down --volumes --remove-orphans
+docker-compose build --no-cache
+docker-compose up --scale api=3 -d
+Visit your API
+Navigate to: https://localhost Refresh to see responses from different api containers.
+> On first run, Caddy automatically requests a certificate and saves its config in Docker volumes.
+🧠 How It Works
+Multiple api containers run a lightweight Flask app that returns its hostname.
+A single Caddy container listens on ports 80/443 and proxies traffic to the api service.
+Docker's internal DNS provides round-robin load balancing between api instances.
+TLS is fully managed by Caddy — no cert hassle.
+⚙️ Configuration Highlights
+Example Caddyfile:
+:443 {
+    reverse_proxy api:80
+}
+Volumes caddy_data and caddy_config persist HTTPS certs and runtime config.
+Clean rebuilds can be triggered any time:
+bash
+docker-compose down --volumes --remove-orphans
+docker-compose up --build --scale api=3 -d
+🔧 Potential Enhancements
+Swap to Ubuntu base for custom debugging tools
+Add logging (e.g., via JSON logs to file)
+Implement health checks, sticky sessions, or resource-based autoscaling
+Visualize traffic via Prometheus + Grafana
+Made with ❤️ + 🐳 by RobinsonLaw
