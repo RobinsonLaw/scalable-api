@@ -1,24 +1,26 @@
-version: "3.8"
+version: "3.8"  # Specify the Compose file format version
+
 services:
   api:
-    build: .
+    build: .                 # Build the Flask app using the Dockerfile in the current directory
     expose:
-      - "80"
-    restart: unless-stopped
+      - "80"                 # Expose port 80 to other containers in the internal Docker network
+    restart: unless-stopped  # Restart the container unless it’s manually stopped
 
   caddy:
-    image: caddy:latest
-    restart:  unless-stopped
+    image: caddy:latest       # Use the latest official Caddy image as a reverse proxy
+    restart: unless-stopped   # Restart unless manually stopped
     ports:
-      - "443:443"
-      - "80:80"
+      - "443:443"             # Map HTTPS traffic from host to container
+      - "80:80"               # Map HTTP traffic from host to container
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
+      - ./Caddyfile:/etc/caddy/Caddyfile  # Mount your Caddy configuration file
+      - caddy_data:/data                  # Persist certificates and SSL data
+      - caddy_config:/config              # Persist Caddy runtime config
     depends_on:
-      - api
+      - api                  # Ensure 'api' service starts before 'caddy'
 
 volumes:
-  caddy_data:
-  caddy_config:
+  caddy_data:    # Named volume for Caddy certificate storage
+  caddy_config:  # Named volume for other Caddy config state
+

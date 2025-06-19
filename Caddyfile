@@ -1,10 +1,16 @@
 {
-	admin 0.0.0.0:2019
+    # Enable the admin API on all interfaces at port 2019
+    # Useful for dynamic configuration and live updates
+    admin 0.0.0.0:2019
 }
 
+# Define a site block for your custom domain
 iotchat.link {
-	tls {
-		issuer acme
-	}
-	reverse_proxy api:80
+    tls {
+        issuer acme  # Use the ACME protocol (e.g. Let’s Encrypt) to automatically obtain HTTPS certificates
+    }
+
+    # Proxy all incoming requests to the internal Docker service 'api' on port 80
+    reverse_proxy api:80
 }
+
